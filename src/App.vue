@@ -23,12 +23,19 @@ html {
   overflow: hidden;
   width: 100%;
 }
+
 body {
   width: 100%;
   height: 100%;
   position: fixed;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+}
+
+@media only screen and (max-width: 600px) {
+  body {
+    overflow-y: hidden;
+  }
 }
 
 .fixed {
