@@ -28,7 +28,7 @@ export class PeerToPeerService {
   getMessageObservable = () => this.messageSubject.observable;
 
   async setupAsHost() {
-    this.peer?.destroy();
+    this.peer?.destroy?.();
     this.peer = new Peer(this.getPeerConfig());
     this.isHost = true;
     await this.connectToPeerServer();

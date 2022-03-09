@@ -72,7 +72,7 @@ export default Vue.extend({
   name: "HomeView",
 
   mounted() {
-    GlobalServices.GameClient?.destroy();
+    GlobalServices.GameClient?.destroy?.();
     mutations.reset();
   },
 

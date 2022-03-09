@@ -23,7 +23,7 @@
           class="keyboard"
         />
       </v-col>
-      <v-col>
+      <v-col v-if="players.length !== 0">
         <div justify="center" style="" class="second-board-container">
           <div
             v-for="player in players"
