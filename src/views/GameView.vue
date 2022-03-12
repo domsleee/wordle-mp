@@ -1,29 +1,76 @@
 <template>
-  <v-container>
-    <v-row style="margin-top: 50px; column-gap: 50px">
-      <v-col class="board main-board">
-        <h2 style="text-align: center">{{ player.name }}</h2>
-        <span style="float: right">{{ player.hp }}s</span>
-        <v-progress-linear
-          color="blue lighten-1"
-          :value="player.hp"
-          height="15"
-        ></v-progress-linear>
-        <BoardComponent
-          :board="player.boardState"
-          :patternBoard="player.patternBoard"
-          :keyEnteredArray="keyEnteredArray"
-          :shake="shake"
-          style="font-size: 38px; width: 100%"
-          v-if="player != null"
-        />
+  <v-container :style="'--hp-color: ' + hpColor">
+    <GameOverDialog :isVisible="player.isGameOver"></GameOverDialog>
+    <v-row style="column-gap: 50px">
+      <v-col class="mobile-players">
+        <div
+          v-for="player in players"
+          :key="player.id"
+          class="mobile-progress-container"
+        >
+          <v-progress-circular
+            :rotate="270"
+            :size="50"
+            :width="4"
+            :value="getHpValue(player.hp)"
+            :color="getHpColor(player.hp)"
+            :background-color="getHpBackgroundColor(player.hp)"
+            class="mobile-progress text-subtitle-2"
+            :class="{
+              'second-circular': getHpShouldSecondCircle(player.hp),
+              'animation-disabled': getHpShouldAnimationBeDisabled(player.hp),
+            }"
+          >
+            {{ player.hp }}
+          </v-progress-circular>
+          <span
+            class="text-subtitle-2"
+            :class="{ 'red--text': player.isGameOver }"
+            >{{ player.name }}</span
+          >
+        </div>
+      </v-col>
+      <v-col class="board main-board-col">
+        <div class="main-board-container" style="margin-top: 86px">
+          <div style="display: flex; width: 100%">
+            <div
+              style="justify-self: left"
+              :class="{ 'red--text': player.isGameOver }"
+            >
+              {{ player.name }}
+            </div>
+            <div style="justify-self: right; text-align: right; flex-grow: 1">
+              {{ player.hp }}s
+            </div>
+          </div>
+
+          <v-progress-linear
+            class="myprogress"
+            :color="getHpColor(player.hp)"
+            :background-color="getHpBackgroundColor(player.hp)"
+            :value="getHpValue(player.hp)"
+            :class="{
+              'animation-disabled': getHpShouldAnimationBeDisabled(player.hp),
+              'red--text': player.isGameOver,
+            }"
+            height="15"
+          ></v-progress-linear>
+          <BoardComponent
+            :board="player.boardState"
+            :patternBoard="player.patternBoard"
+            :keyEnteredArray="keyEnteredArray"
+            :shake="shake"
+            class="main-board-component"
+            v-if="player != null"
+          />
+        </div>
         <KeyboardComponent
           :keypress="keypress"
           :letterToPattern="letterToPattern"
           class="keyboard"
         />
       </v-col>
-      <v-col v-if="players.length !== 0">
+      <v-col v-if="players.length !== 0" class="second-column">
         <div justify="center" style="" class="second-board-container">
           <div
             v-for="player in players"
@@ -32,8 +79,13 @@
           >
             <h3 style="text-align: center; width: 100%">{{ player.name }}</h3>
             <v-progress-linear
-              color="blue lighten-1"
-              :value="player.hp"
+              :color="getHpColor(player.hp)"
+              :value="getHpValue(player.hp)"
+              :background-color="getHpBackgroundColor(player.hp)"
+              :class="{
+                'animation-disabled': getHpShouldAnimationBeDisabled(player.hp),
+                'red--text': player.isGameOver,
+              }"
               height="5"
             ></v-progress-linear>
             <BoardComponent
@@ -51,17 +103,9 @@
 
 <style scoped lang="scss">
 $minWidth: 200px;
-:root {
-}
+
 .keyboard {
   margin-top: 5px;
-}
-
-.main-board {
-  min-width: 300px;
-  max-width: 400px;
-  width: 100%;
-  margin: auto;
 }
 
 .second-board {
@@ -87,12 +131,98 @@ $minWidth: 200px;
   align-items: center;
   */
 }
+
+.main-board-component {
+  width: 100%;
+  font-size: 38px;
+}
+
+.main-board-col {
+  min-width: 300px;
+  max-width: 400px;
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-players {
+  display: none;
+}
+
+@media only screen and (max-width: 600px) {
+  .container {
+    padding: 0px;
+  }
+  .main-board-col {
+    padding: 0 !important;
+    height: 100%;
+    max-width: 200% !important;
+    position: fixed;
+  }
+  .main-board-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    width: auto !important;
+    flex-grow: 1;
+  }
+
+  .keyboard {
+    width: 100%;
+    padding-bottom: 15px;
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .second-column {
+    display: none;
+  }
+
+  .mobile-players {
+    display: flex;
+    gap: 10px;
+  }
+
+  .mobile-progress-container {
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+</style>
+
+<style>
+.second-circular .v-progress-circular__underlay {
+  stroke: var(--hp-color);
+}
+
+.myprogress div:first-child {
+  width: 100% !important;
+}
+
+.mobile-progress .v-progress-circular__overlay {
+  transition: color 0.6s ease-in-out;
+}
+
+.mobile-progress.animation-disabled .v-progress-circular__overlay {
+  transition: none;
+}
+
+.myprogress.v-progress-linear {
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.myprogress.animation-disabled {
+  transition: none;
+}
 </style>
 
 <script lang="ts">
 import Vue from "vue";
 import BoardComponent from "@/components/BoardComponent.vue";
 import KeyboardComponent from "@/components/KeyboardComponent.vue";
+import GameOverDialog from "@/components/GameOverDialog.vue";
 
 import { GlobalServices } from "@/services/GlobalServices";
 import { IPlayer } from "@/services/Store/IPlayer";
@@ -106,6 +236,7 @@ import {
 import { mutations, store } from "@/services/Store/Store";
 import { PatternGetter } from "@/services/GameClient/PatternGetter";
 import { Subject, Subscription, timer } from "rxjs";
+import { colors } from "vuetify/lib";
 
 // see https://stackoverflow.com/questions/56002310/property-xxx-does-not-exist-on-type-combinedvueinstancevue-read
 declare module "vue/types/vue" {
@@ -113,13 +244,18 @@ declare module "vue/types/vue" {
     setupLocalGame: () => void;
     keyEntered: (v: { row: number; col: number }) => void;
     shakeWord: () => void;
+    getHpValue: (hp: number) => number;
+    getHpColor: (hp: number) => number;
   }
 }
+
+const primaryHpColor = "green";
 
 export default Vue.extend({
   components: {
     BoardComponent,
     KeyboardComponent,
+    GameOverDialog,
   },
   data: () => ({
     keypress: new Subject<string>(),
@@ -127,7 +263,8 @@ export default Vue.extend({
     letterToPattern: new Array<number>(27),
     shake: new Array<boolean>(6).fill(false),
     keyEnteredArray: getBoardArray(getEmptyBoardState(5, 6)),
-    timerSub: null as Subscription | null,
+    partialSecond: 0,
+    hpColor: colors[primaryHpColor].lighten1,
   }),
   computed: {
     player: () => {
@@ -164,13 +301,36 @@ export default Vue.extend({
       otherPlayers.forEach((t) => mutations.addPlayer(t));
 
       setTimeout(() => {
-        mutations.applyPattern({
-          player: otherPlayers[0],
-          row: 0,
-          pattern: ["?", "?", "?", "?", "?"],
-          guess: "chair",
-        });
+        GlobalServices.GameClient?.applyPattern(otherPlayers[0], "chair", [
+          "?",
+          "?",
+          "?",
+          "?",
+          "?",
+        ]);
       }, 1000);
+    },
+    getHpColor(hp: number): string {
+      if (hp > 120) return "pink lighten-1";
+      if (hp > 60) return "blue lighten-1";
+      if (hp > 30) return `${primaryHpColor} lighten-1`;
+      if (hp > 15) return "amber";
+      return "red";
+    },
+    getHpValue(hp: number) {
+      if (hp >= 180) return 100;
+      if (hp > 60) return this.getHpValue(hp % 60);
+      return ((hp - this.partialSecond) * 100) / 60;
+    },
+    getHpBackgroundColor(hp: number) {
+      if (hp > 60) return this.getHpColor(45);
+      return "";
+    },
+    getHpShouldSecondCircle(hp: number) {
+      return hp > 60;
+    },
+    getHpShouldAnimationBeDisabled(hp: number) {
+      return hp >= 55;
     },
   },
 
@@ -179,11 +339,8 @@ export default Vue.extend({
       this.setupLocalGame();
     }
 
-    const patternGetter = new PatternGetter();
+    const patternGetter = new PatternGetter(store.state.seed);
     GlobalServices.GameClient?.startGame(patternGetter);
-    this.timerSub = timer(1000, 1000).subscribe((t) => {
-      mutations.deductHp(this.player!);
-    });
 
     this.subscriptions = [
       this.keypress.subscribe((t) => {
@@ -195,10 +352,14 @@ export default Vue.extend({
       GlobalServices.GameClient!.keyEntered.subscribe((v) => {
         this.keyEntered(v);
       }),
+      timer(1000, 1000).subscribe((t) => {
+        GlobalServices.GameClient?.tick();
+        this.partialSecond = 0;
+      }),
+      timer(100, 100).subscribe((t) => {
+        this.partialSecond = Math.min(1, this.partialSecond + 0.1);
+      }),
     ];
-  },
-  beforeDestroy() {
-    this.timerSub?.unsubscribe();
   },
   destroyed() {
     this.subscriptions.forEach((t) => t.unsubscribe());

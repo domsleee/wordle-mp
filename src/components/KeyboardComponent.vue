@@ -1,18 +1,19 @@
 <template>
   <v-container class="container">
-    <v-row
+    <div
       v-for="(row, rowIndex) in rows"
       :key="rowIndex"
-      class="row justify-center"
+      class="keyboardRow justify-center"
     >
       <div
         v-for="(char, colIndex) in row"
         :key="colIndex"
-        class="rowDiv"
+        class="column"
         :class="{ enter: char === 'ENTER' }"
       >
         <v-btn
-          class="btn grey darken-2"
+          class="btn keyboard-btn"
+          :ripple="{ class: 'blue--text', center: true }"
           :class="{
             [charToClass(
               letterToPattern[keyIndexArray[rowIndex][colIndex]]
@@ -24,20 +25,31 @@
           <span v-else>{{ char }}</span>
         </v-btn>
       </div>
-    </v-row>
+    </div>
   </v-container>
 </template>
 
+<style>
+.keyboard-btn span.v-ripple__animation {
+  transition-duration: 0.01s, 0.01s;
+}
+</style>
+
 <style scoped>
 .container {
-  --item-width: calc(10% - 5px);
+  --key-margin: 3px;
+  --item-width: 10%; /*calc(10% - var(--key-margin));*/
 }
-.rowDiv {
-  margin-right: 5px;
-  margin-bottom: 5px;
+.keyboardRow {
+  display: flex;
+}
+.column {
+  padding-right: var(--key-margin);
+  padding-bottom: var(--key-margin);
   width: var(--item-width);
+  box-sizing: border-box;
 }
-.row:nth-child(2) {
+.keyboardRow:nth-child(2) {
   /*margin-left: calc(var(--item-width) * 0.3);*/
 }
 .btn .v-btn__content {
@@ -49,13 +61,13 @@
   padding: 0px 0px !important;
   width: 100% !important;
   min-width: 0 !important;
-  height: 36px !important;
+  height: 48px !important;
   background: grey;
 }
-.rowDiv.enter {
+.column.enter {
   width: calc(var(--item-width) * 2) !important;
 }
-.rowDiv.enter .btn {
+.column.enter .btn {
   font-size: 12px;
 }
 </style>
@@ -122,6 +134,9 @@ export default Vue.extend({
     charToClass: (char: PatternCharOrBlank) => {
       if (char == "_") {
         return "incorrect black darken-4";
+      }
+      if (char == "") {
+        return "grey darken-2";
       }
       return charToClass(char);
     },

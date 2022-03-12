@@ -4,8 +4,9 @@ export interface IPlayer {
   id: string;
   name: string;
   hp: number;
+  score: number;
+  isGameOver: boolean;
   numGuesses: number;
-  locked: boolean;
   boardState: BoardType;
   patternBoard: BoardType;
   letterToPattern: Array<PatternChar | "">;

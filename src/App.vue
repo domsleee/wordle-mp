@@ -20,7 +20,7 @@
 
 <style lang="scss">
 html {
-  overflow: hidden;
+  overflow-y: hidden;
   width: 100%;
 }
 
@@ -44,7 +44,7 @@ body {
   transform: translateX(-50%);
 }
 .alert-container {
-  width: 600px !important;
+  max-width: 600px !important;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

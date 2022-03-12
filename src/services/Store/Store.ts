@@ -14,6 +14,7 @@ import {
 } from "./ISetBoard";
 import {
   createEmptyPlayer,
+  getDefaultScoreConfig,
   getMaxPatternChar,
   getPlayerById,
   PatternType,
@@ -21,6 +22,7 @@ import {
 import { apply } from "loglevel-plugin-prefix";
 import { A_CHAR_CODE } from "../GameClient/PatternGetter";
 import { GlobalServices } from "../GlobalServices";
+import { IScoreConfig } from "../GameClient/IScoreConfig";
 
 // declare your own store states
 export interface State {
@@ -28,6 +30,8 @@ export interface State {
   notifications: Array<StoredNotification>;
   isInGame: boolean;
   players: Array<IPlayer>;
+  seed: string;
+  scoreConfig: IScoreConfig;
 }
 Vue.use(Vuex);
 
@@ -37,6 +41,8 @@ function getInitialState() {
     notifications: [],
     isInGame: false,
     players: [],
+    seed: "1234",
+    scoreConfig: getDefaultScoreConfig(),
   };
 }
 
@@ -64,6 +70,7 @@ export const store = new Vuex.Store({
       if (GlobalServices.PeerToPeer.getIsHost()) {
         sendUserAllData(player.id);
       }
+      mutations.sortPlayers();
     },
     setBoard(state: State, setBoard: ISetBoard) {
       const player = getPlayerById(state, setBoard.player.id);
@@ -87,9 +94,6 @@ export const store = new Vuex.Store({
         }
 
         player.numGuesses += 1;
-        if (applyPattern.pattern.filter((t) => t !== "+").length === 0) {
-          player.locked = true;
-        }
         publishPlayer(applyPattern.player);
       }
     },
@@ -122,10 +126,40 @@ export const store = new Vuex.Store({
         player.numGuesses = partialPlayer.numGuesses!;
     },
     reset(state: State) {
-      state = getInitialState();
+      const { notifications, ...rest } = getInitialState();
+      Object.assign(state, rest);
     },
-    deductHp(state: State, player: IPlayer) {
-      player.hp--;
+    deductHpForAllPlayers(state: State, player: IPlayer) {
+      for (const p of state.players) {
+        p.hp = Math.max(0, p.hp - 1);
+      }
+    },
+    addHp(state: State, command: { player: IPlayer; hpToAdd: number }) {
+      const player = getPlayerById(state, command.player.id);
+      player!.hp += command.hpToAdd;
+      player!.score += command.hpToAdd;
+      console.log(player);
+      mutations.sortPlayers();
+    },
+    clearBoard(state: State, player: IPlayer) {
+      const p = createEmptyPlayer("dummy");
+      player.boardState = p.boardState;
+      player.patternBoard = p.patternBoard;
+      player.numGuesses = p.numGuesses;
+      player.letterToPattern = p.letterToPattern;
+    },
+    gameOver(state: State, player: IPlayer) {
+      player.isGameOver = true;
+      publishPlayer(player);
+    },
+    sortPlayers(state: State) {
+      state.players.sort((a, b) => {
+        if (a.score !== b.score) {
+          return b.score - a.score;
+        }
+
+        return a.name < b.name ? -1 : 1;
+      });
     },
   },
 });
@@ -171,7 +205,19 @@ export const mutations = {
   reset() {
     store.commit("reset");
   },
-  deductHp(player: IPlayer) {
-    store.commit("deductHp", player);
+  deductHpForAllPlayers() {
+    store.commit("deductHpForAllPlayers");
+  },
+  addHp(player: IPlayer, hpToAdd: number) {
+    store.commit("addHp", { player, hpToAdd });
+  },
+  clearBoard(player: IPlayer) {
+    store.commit("clearBoard", player);
+  },
+  gameOver(player: IPlayer) {
+    store.commit("gameOver", player);
+  },
+  sortPlayers() {
+    store.commit("sortPlayers");
   },
 };

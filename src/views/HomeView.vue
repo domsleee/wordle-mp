@@ -24,6 +24,7 @@
         height="34"
         style="width: 0px"
         hide-details="auto"
+        @keydown.enter="joinGame"
         outlined
       >
       </v-text-field>
@@ -34,7 +35,7 @@
               :loading="joinLoading"
               :disabled="joinLoading || lobbyCode === ''"
               color="primary"
-              class="ma-0 ml-2"
+              class="ma-0 ml-1"
               style="flex-grow: inherit"
               @click="joinGame"
               outlined
@@ -59,6 +60,9 @@
   display: flex;
   flex-grow: inherit;
 }
+.v-btn:not(.v-btn--round).v-size--x-large {
+  padding: 0;
+}
 </style>
 
 <script lang="ts">
@@ -67,6 +71,9 @@ import router from "@/router/index";
 import { mutations, store } from "@/services/Store/Store";
 import { GlobalServices } from "@/services/GlobalServices";
 import { createEmptyPlayer } from "@/services/GameClient/utils";
+import { getLogger } from "loglevel";
+
+const logger = getLogger("home-view");
 
 export default Vue.extend({
   name: "HomeView",
@@ -84,6 +91,8 @@ export default Vue.extend({
   }),
   methods: {
     createGame: async function () {
+      if (this.createLoading) return;
+      this.confirmAndResetGame();
       this.createLoading = true;
       try {
         await GlobalServices.PeerToPeer.setupAsHost();
@@ -100,6 +109,8 @@ export default Vue.extend({
       }
     },
     joinGame: async function () {
+      if (this.joinLoading) return;
+      this.confirmAndResetGame();
       this.joinLoading = true;
       const lobbyCode = this.lobbyCode;
       try {
@@ -114,6 +125,13 @@ export default Vue.extend({
         this.joinLoading = false;
         throw e;
       }
+    },
+    confirmAndResetGame: function () {
+      if (GlobalServices.PeerToPeer.getIsConnected()) {
+        logger.warn("overriding existing game");
+      }
+      mutations.reset();
+      GlobalServices.PeerToPeer.dispose();
     },
     gotoLobby: function () {
       GlobalServices.registerGameClient();

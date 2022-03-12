@@ -36,6 +36,7 @@ export class StorePubSub {
       name: player.name,
       numGuesses: player.numGuesses,
       hp: player.hp,
+      isGameOver: player.isGameOver,
     };
   }
 

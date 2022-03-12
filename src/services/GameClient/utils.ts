@@ -1,5 +1,6 @@
 import { IPlayer } from "../Store/IPlayer";
 import { State, store } from "../Store/Store";
+import { IScoreConfig } from "./IScoreConfig";
 
 export type BoardType = Array<Array<string>>;
 export function getEmptyBoardState(
@@ -30,11 +31,12 @@ export function createEmptyPlayer(id: string, name = "Guest"): IPlayer {
   return {
     name,
     numGuesses: 0,
-    locked: false,
+    score: 0,
     id,
+    isGameOver: false,
     boardState: getEmptyBoardState(5, 6),
     patternBoard: getEmptyBoardState(5, 6),
-    hp: 100,
+    hp: store.state.scoreConfig.startingHp,
     letterToPattern: new Array<PatternChar | "">(27).fill(""),
   };
 }
@@ -76,3 +78,17 @@ export type PatternChar = "?" | "+" | "_";
 export type PatternCharOrBlank = PatternChar | "";
 
 export type PatternType = Array<PatternCharOrBlank>;
+
+export function getDefaultScoreConfig(): IScoreConfig {
+  return {
+    hpForCorrectWord: 20,
+    hpForGreen: 2,
+    hpForYellow: 1,
+    hpForIncorrectWord: 20,
+    startingHp: 5,
+  };
+}
+
+export function isCorrectPattern(pattern: PatternType) {
+  return pattern.filter((t) => t !== "+").length === 0;
+}

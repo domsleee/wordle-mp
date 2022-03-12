@@ -21,8 +21,10 @@
           outlined
           label="name"
           v-model="name"
-          maxlength="20"
+          maxlength="12"
           hide-details="auto"
+          @keydown.enter="changeName"
+          class="inline-text-field"
           >Name</v-text-field
         >
         <v-btn
@@ -63,6 +65,11 @@
 div.grid-container {
   text-align: center;
   /*background: rgba(114, 186, 94, 0.05);*/
+}
+
+.inline-text-field {
+  width: 0px;
+  min-width: 100px;
 }
 
 div.tooltip-helper {

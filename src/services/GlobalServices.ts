@@ -14,6 +14,7 @@ export const GlobalServices = {
     GlobalServices.GameHost = new GameHost();
   },
   registerGameClient() {
+    GlobalServices.StorePubSub.detach();
     GlobalServices.GameClient = new GameClient();
     GlobalServices.StorePubSub.attach();
   },
