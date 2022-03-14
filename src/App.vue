@@ -32,7 +32,7 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 480px) {
   body {
     overflow-y: hidden;
   }

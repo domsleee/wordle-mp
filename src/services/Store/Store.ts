@@ -70,7 +70,6 @@ export const store = new Vuex.Store({
       if (GlobalServices.PeerToPeer.getIsHost()) {
         sendUserAllData(player.id);
       }
-      mutations.sortPlayers();
     },
     setBoard(state: State, setBoard: ISetBoard) {
       const player = getPlayerById(state, setBoard.player.id);
@@ -139,7 +138,6 @@ export const store = new Vuex.Store({
       player!.hp += command.hpToAdd;
       player!.score += command.hpToAdd;
       console.log(player);
-      mutations.sortPlayers();
     },
     clearBoard(state: State, player: IPlayer) {
       const p = createEmptyPlayer("dummy");
@@ -152,8 +150,10 @@ export const store = new Vuex.Store({
       player.isGameOver = true;
       publishPlayer(player);
     },
-    sortPlayers(state: State) {
-      state.players.sort((a, b) => {
+  },
+  getters: {
+    sortedPlayers: (state) => {
+      return state.players.sort((a, b) => {
         if (a.score !== b.score) {
           return b.score - a.score;
         }
@@ -216,8 +216,5 @@ export const mutations = {
   },
   gameOver(player: IPlayer) {
     store.commit("gameOver", player);
-  },
-  sortPlayers() {
-    store.commit("sortPlayers");
   },
 };

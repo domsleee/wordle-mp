@@ -3,32 +3,10 @@
     <GameOverDialog :isVisible="player.isGameOver"></GameOverDialog>
     <v-row style="column-gap: 50px">
       <v-col class="mobile-players">
-        <div
-          v-for="player in players"
-          :key="player.id"
-          class="mobile-progress-container"
-        >
-          <v-progress-circular
-            :rotate="270"
-            :size="50"
-            :width="4"
-            :value="getHpValue(player.hp)"
-            :color="getHpColor(player.hp)"
-            :background-color="getHpBackgroundColor(player.hp)"
-            class="mobile-progress text-subtitle-2"
-            :class="{
-              'second-circular': getHpShouldSecondCircle(player.hp),
-              'animation-disabled': getHpShouldAnimationBeDisabled(player.hp),
-            }"
-          >
-            {{ player.hp }}
-          </v-progress-circular>
-          <span
-            class="text-subtitle-2"
-            :class="{ 'red--text': player.isGameOver }"
-            >{{ player.name }}</span
-          >
-        </div>
+        <MobileHealthBars
+          :players="sortedPlayers"
+          :partialSecond="partialSecond"
+        />
       </v-col>
       <v-col class="board main-board-col">
         <div class="main-board-container" style="margin-top: 86px">
@@ -150,16 +128,18 @@ $minWidth: 200px;
   display: none;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 480px) {
   .container {
     padding: 0px;
   }
+
   .main-board-col {
     padding: 0 !important;
     height: 100%;
     max-width: 200% !important;
     position: fixed;
   }
+
   .main-board-container {
     padding-left: 20px;
     padding-right: 20px;
@@ -182,33 +162,13 @@ $minWidth: 200px;
     display: flex;
     gap: 10px;
   }
-
-  .mobile-progress-container {
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
 }
 </style>
 
 <style>
-.second-circular .v-progress-circular__underlay {
-  stroke: var(--hp-color);
-}
-
 .myprogress div:first-child {
   width: 100% !important;
 }
-
-.mobile-progress .v-progress-circular__overlay {
-  transition: color 0.6s ease-in-out;
-}
-
-.mobile-progress.animation-disabled .v-progress-circular__overlay {
-  transition: none;
-}
-
 .myprogress.v-progress-linear {
   transition: color 0.2s cubic-bezier(0.4, 0, 0.6, 1);
 }
@@ -223,6 +183,7 @@ import Vue from "vue";
 import BoardComponent from "@/components/BoardComponent.vue";
 import KeyboardComponent from "@/components/KeyboardComponent.vue";
 import GameOverDialog from "@/components/GameOverDialog.vue";
+import MobileHealthBars from "@/components/MobileHealthBars.vue";
 
 import { GlobalServices } from "@/services/GlobalServices";
 import { IPlayer } from "@/services/Store/IPlayer";
@@ -237,6 +198,9 @@ import { mutations, store } from "@/services/Store/Store";
 import { PatternGetter } from "@/services/GameClient/PatternGetter";
 import { Subject, Subscription, timer } from "rxjs";
 import { colors } from "vuetify/lib";
+import { HpColorDefinitions, primaryHpColor } from "@/services/GameGuiUtil";
+
+const hpColorUtils = new HpColorDefinitions();
 
 // see https://stackoverflow.com/questions/56002310/property-xxx-does-not-exist-on-type-combinedvueinstancevue-read
 declare module "vue/types/vue" {
@@ -249,13 +213,12 @@ declare module "vue/types/vue" {
   }
 }
 
-const primaryHpColor = "green";
-
 export default Vue.extend({
   components: {
     BoardComponent,
     KeyboardComponent,
     GameOverDialog,
+    MobileHealthBars,
   },
   data: () => ({
     keypress: new Subject<string>(),
@@ -272,6 +235,11 @@ export default Vue.extend({
     },
     players() {
       return store.state.players.filter((t) => t.id != this.player!.id);
+    },
+    sortedPlayers() {
+      return store.getters.sortedPlayers.filter(
+        (t: IPlayer) => t.id !== this.player!.id
+      );
     },
   },
   methods: {
@@ -310,28 +278,13 @@ export default Vue.extend({
         ]);
       }, 1000);
     },
-    getHpColor(hp: number): string {
-      if (hp > 120) return "pink lighten-1";
-      if (hp > 60) return "blue lighten-1";
-      if (hp > 30) return `${primaryHpColor} lighten-1`;
-      if (hp > 15) return "amber";
-      return "red";
-    },
+    getHpColor: (hp: number) => hpColorUtils.getHpColor(hp),
     getHpValue(hp: number) {
-      if (hp >= 180) return 100;
-      if (hp > 60) return this.getHpValue(hp % 60);
-      return ((hp - this.partialSecond) * 100) / 60;
+      return hpColorUtils.getHpValue(hp, this.partialSecond);
     },
-    getHpBackgroundColor(hp: number) {
-      if (hp > 60) return this.getHpColor(45);
-      return "";
-    },
-    getHpShouldSecondCircle(hp: number) {
-      return hp > 60;
-    },
-    getHpShouldAnimationBeDisabled(hp: number) {
-      return hp >= 55;
-    },
+    getHpBackgroundColor: (hp: number) => hpColorUtils.getHpBackgroundColor(hp),
+    getHpShouldAnimationBeDisabled: (hp: number) =>
+      hpColorUtils.getHpShouldAnimationBeDisabled(hp),
   },
 
   beforeMount() {

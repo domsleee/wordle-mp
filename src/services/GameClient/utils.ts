@@ -85,7 +85,7 @@ export function getDefaultScoreConfig(): IScoreConfig {
     hpForGreen: 2,
     hpForYellow: 1,
     hpForIncorrectWord: 20,
-    startingHp: 5,
+    startingHp: 70,
   };
 }
 
