@@ -80,6 +80,7 @@ import {
   PatternCharOrBlank,
 } from "@/services/GameClient/utils";
 import { GlobalServices } from "@/services/GlobalServices";
+import { GameModule } from "@/services/Store/modules/Game";
 import { store } from "@/services/Store/Store";
 import { Subject } from "rxjs";
 import Vue, { PropType } from "vue";
@@ -118,8 +119,8 @@ export default Vue.extend({
   }),
   computed: {
     letterToPattern() {
-      console.log("players", store.state.players);
-      return getPlayerById(store.state, GlobalServices.PeerToPeer.getId())!
+      console.log("players", GameModule.players);
+      return getPlayerById(GameModule, GlobalServices.PeerToPeer.getId())!
         .letterToPattern;
     },
   },

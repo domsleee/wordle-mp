@@ -91,10 +91,10 @@ div.tooltip-helper > button {
 <script lang="ts">
 import Vue from "vue";
 import PlayerInfoComponent from "@/components/PlayerInfoComponent.vue";
-import { mutations, store } from "@/services/Store/Store";
 import { createEmptyPlayer, getPlayerById } from "@/services/GameClient/utils";
 import { GlobalServices } from "@/services/GlobalServices";
 import router from "@/router";
+import { GameModule } from "@/services/Store/modules/Game";
 export default Vue.extend({
   components: {
     PlayerInfoComponent,
@@ -103,14 +103,9 @@ export default Vue.extend({
     items: new Array<number>(),
     name: "",
   }),
-  mounted() {
-    const otherPlayer = createEmptyPlayer("abc" + 1);
-    otherPlayer.name = "Guest2";
-    //mutations.addPlayer(otherPlayer);
-  },
   computed: {
     players: () => {
-      return store.state.players;
+      return GameModule.players;
     },
     hostId: () => {
       return GlobalServices.PeerToPeer.getHostId();
@@ -124,9 +119,9 @@ export default Vue.extend({
       this.items.push(this.items.length);
     },
     changeName() {
-      mutations.changeName({
+      GameModule.changeName({
         name: this.name,
-        player: getPlayerById(store.state, GlobalServices.PeerToPeer.getId())!,
+        player: getPlayerById(GameModule, GlobalServices.PeerToPeer.getId())!,
       });
     },
     startGame() {

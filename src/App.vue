@@ -87,10 +87,13 @@ body {
 }
 </style>
 
-<script>
+<script lang="ts">
 import Vue from "vue";
 import { store } from "@/services/Store/Store";
 import AlertComponent from "@/components/AlertComponent.vue";
+import { NotificationsModule } from "@/services/Store/modules/Notifications";
+import { mapState } from "vuex";
+
 const DEFAULT_TRANSITION = "fade";
 
 const app = Vue.extend({
@@ -104,13 +107,14 @@ const app = Vue.extend({
     };
   },
   computed: {
+    // todo: use mapped state
     notifications() {
-      return store.state.notifications;
+      return NotificationsModule.notifications;
     },
   },
   created() {
     this.$router.beforeEach((to, from, next) => {
-      let transitionName = to.meta.transitionName || from.meta.transitionName;
+      let transitionName = to.meta?.transitionName || from.meta?.transitionName;
 
       const toDepth = to.path == "/" ? 1 : to.path.split("/").length;
       const fromDepth = from.path == "/" ? 1 : from.path.split("/").length;

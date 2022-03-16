@@ -187,18 +187,18 @@ import MobileHealthBars from "@/components/MobileHealthBars.vue";
 
 import { GlobalServices } from "@/services/GlobalServices";
 import { IPlayer } from "@/services/Store/IPlayer";
-import { DEFAULT_ID } from "@/services/PeerToPeer/PeerToPeerService";
 import {
   createEmptyPlayer,
   getBoardArray,
   getEmptyBoardState,
   getPlayerById,
 } from "@/services/GameClient/utils";
-import { mutations, store } from "@/services/Store/Store";
 import { PatternGetter } from "@/services/GameClient/PatternGetter";
 import { Subject, Subscription, timer } from "rxjs";
 import { colors } from "vuetify/lib";
 import { HpColorDefinitions, primaryHpColor } from "@/services/GameGuiUtil";
+import { DEFAULT_ID } from "@/services/PeerToPeer/PeerToPeerService";
+import { GameModule } from "@/services/Store/modules/Game";
 
 const hpColorUtils = new HpColorDefinitions();
 
@@ -231,13 +231,13 @@ export default Vue.extend({
   }),
   computed: {
     player: () => {
-      return getPlayerById(store.state, GlobalServices.PeerToPeer.getId());
+      return getPlayerById(GameModule, GlobalServices.PeerToPeer.getId());
     },
     players() {
-      return store.state.players.filter((t) => t.id != this.player!.id);
+      return GameModule.players.filter((t: IPlayer) => t.id != this.player!.id);
     },
     sortedPlayers() {
-      return store.getters.sortedPlayers.filter(
+      return GameModule.sortedPlayers.filter(
         (t: IPlayer) => t.id !== this.player!.id
       );
     },
@@ -257,7 +257,7 @@ export default Vue.extend({
       GlobalServices.registerGameClient();
       const myPlayer: IPlayer = createEmptyPlayer(DEFAULT_ID);
 
-      mutations.addPlayer(myPlayer);
+      GameModule.addPlayer(myPlayer);
       myPlayer.name = "guy";
 
       const otherPlayers: IPlayer[] = [
@@ -266,7 +266,7 @@ export default Vue.extend({
         createEmptyPlayer(DEFAULT_ID + "4", "anoter"),
       ];
 
-      otherPlayers.forEach((t) => mutations.addPlayer(t));
+      otherPlayers.forEach((t) => GameModule.addPlayer(t));
 
       setTimeout(() => {
         GlobalServices.GameClient?.applyPattern(otherPlayers[0], "chair", [
@@ -292,7 +292,7 @@ export default Vue.extend({
       this.setupLocalGame();
     }
 
-    const patternGetter = new PatternGetter(store.state.seed);
+    const patternGetter = new PatternGetter(GameModule.seed);
     GlobalServices.GameClient?.startGame(patternGetter);
 
     this.subscriptions = [

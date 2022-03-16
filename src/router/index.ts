@@ -1,5 +1,5 @@
 import { GlobalServices } from "@/services/GlobalServices";
-import { mutations, store } from "@/services/Store/Store";
+import { NotificationsModule } from "@/services/Store/modules/Notifications";
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import HomeAndLobbyView from "../views/HomeAndLobbyView.vue";
@@ -44,7 +44,7 @@ router.beforeEach((to, from, next) => {
     !GlobalServices.PeerToPeer.getIsConnected()
   ) {
     setTimeout(() => {
-      mutations.raiseNotification({
+      NotificationsModule.raiseNotification({
         type: "warning",
         msg: "rejoining lobbies by refreshing is not supported",
       });

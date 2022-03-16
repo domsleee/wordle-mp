@@ -11,8 +11,10 @@
 
 <script lang="ts">
 import { StoredNotification } from "@/services/Store/INotificationType";
-import { mutations, store } from "@/services/Store/Store";
 import Vue, { PropType } from "vue";
+import { store } from "@/services/Store/Store";
+import { NotificationsModule } from "@/services/Store/modules/Notifications";
+
 export default Vue.extend({
   props: {
     notification: Object as PropType<StoredNotification>,
@@ -25,7 +27,7 @@ export default Vue.extend({
       },
       set(v) {
         // @ts-ignore
-        if (!v) mutations.hideNotification(this.notification);
+        if (!v) NotificationsModule.hideNotification(this.notification);
       },
     },
   },

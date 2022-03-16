@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { store } from "@/services/Store/Store";
+import { GameModule } from "@/services/Store/modules/Game";
 import Vue from "vue";
 export default Vue.extend({
   props: {
@@ -29,7 +29,7 @@ export default Vue.extend({
   },
   computed: {
     players: () => {
-      return store.state.players;
+      return GameModule.players;
     },
   },
 });

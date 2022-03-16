@@ -28,7 +28,7 @@
 import Vue, { PropType } from "vue";
 import { Prop } from "vue/types/options";
 import { IPlayer } from "@/services/Store/IPlayer";
-import { mutations, store } from "@/services/Store/Store";
+import { store } from "@/services/Store/Store";
 import { createEmptyPlayer } from "@/services/GameClient/utils";
 
 export default Vue.extend({

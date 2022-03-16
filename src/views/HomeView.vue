@@ -68,10 +68,12 @@
 <script lang="ts">
 import Vue from "vue";
 import router from "@/router/index";
-import { mutations, store } from "@/services/Store/Store";
 import { GlobalServices } from "@/services/GlobalServices";
 import { createEmptyPlayer } from "@/services/GameClient/utils";
 import { getLogger } from "loglevel";
+import { getModule } from "vuex-module-decorators";
+import { NotificationsModule } from "@/services/Store/modules/Notifications";
+import { GameModule } from "@/services/Store/modules/Game";
 
 const logger = getLogger("home-view");
 
@@ -80,7 +82,7 @@ export default Vue.extend({
 
   mounted() {
     GlobalServices.GameClient?.destroy?.();
-    mutations.reset();
+    GameModule.reset();
   },
 
   data: () => ({
@@ -99,7 +101,7 @@ export default Vue.extend({
         GlobalServices.registerGameHost();
         this.gotoLobby();
       } catch (e) {
-        mutations.raiseNotification({
+        NotificationsModule.raiseNotification({
           type: "error",
           msg: "unable to create game",
           error: e,
@@ -117,7 +119,7 @@ export default Vue.extend({
         await GlobalServices.PeerToPeer.setupByConnectingToId(lobbyCode);
         this.gotoLobby();
       } catch (e) {
-        mutations.raiseNotification({
+        NotificationsModule.raiseNotification({
           type: "error",
           msg: `unable to join lobby code "${lobbyCode}"`,
           error: e,
@@ -130,12 +132,14 @@ export default Vue.extend({
       if (GlobalServices.PeerToPeer.getIsConnected()) {
         logger.warn("overriding existing game");
       }
-      mutations.reset();
+      GameModule.reset();
       GlobalServices.PeerToPeer.dispose();
     },
     gotoLobby: function () {
       GlobalServices.registerGameClient();
-      mutations.addPlayer(createEmptyPlayer(GlobalServices.PeerToPeer.getId()));
+      GameModule.addPlayer(
+        createEmptyPlayer(GlobalServices.PeerToPeer.getId())
+      );
       router.push("/lobby/" + GlobalServices.PeerToPeer.getId());
     },
   },

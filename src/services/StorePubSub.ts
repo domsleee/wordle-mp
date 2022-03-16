@@ -1,7 +1,8 @@
 import { Subject, Subscription } from "rxjs";
 import { GlobalServices } from "./GlobalServices";
 import { IPlayer } from "./Store/IPlayer";
-import { mutations, store } from "./Store/Store";
+import { GameModule } from "./Store/modules/Game";
+import { store } from "./Store/Store";
 
 export class StorePubSub {
   subs?: Subscription;
@@ -11,7 +12,7 @@ export class StorePubSub {
     this.subs = GlobalServices.PeerToPeer.getMessageObservable().subscribe(
       (msg) => {
         if (msg.data.command === "UPDATE_PLAYER") {
-          mutations.processPlayer(msg.data.data);
+          GameModule.processPlayer(msg.data.data);
         } else if (msg.data.command === "START_GAME") {
           this.startGame.next();
         }
@@ -41,7 +42,7 @@ export class StorePubSub {
   }
 
   sendUserAllData(id: string) {
-    for (const player of store.state.players) {
+    for (const player of GameModule.players) {
       if (player.id !== id) {
         GlobalServices.PeerToPeer.sendSingleMessage(id, {
           command: "UPDATE_PLAYER",

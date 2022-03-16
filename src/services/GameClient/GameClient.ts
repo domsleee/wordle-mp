@@ -1,4 +1,4 @@
-import { mutations, store } from "../Store/Store";
+import { store } from "../Store/Store";
 import { KeyboardEventsService } from "../KeyboardEventsService";
 import { GlobalServices } from "../GlobalServices";
 import { IPlayer } from "../Store/IPlayer";
@@ -9,6 +9,7 @@ import { Subject, Subscription } from "rxjs";
 import { dictionary } from "./Dictionary";
 import { StorePubSub } from "../StorePubSub";
 import router from "@/router";
+import { GameModule } from "../Store/modules/Game";
 
 const logger = getLogger("game-client");
 const NUM_GUESSES = 6;
@@ -33,7 +34,7 @@ export default class GameClient {
   }
 
   onKeyPress(key: string) {
-    if (!store.state.isInGame) return;
+    if (!GameModule.isInGame) return;
     if ("a" <= key && key <= "z") {
       this.tryApplyKey(key);
     } else if (key == "Enter") {
@@ -49,21 +50,21 @@ export default class GameClient {
   }
 
   startGame(patternGetter: PatternGetter) {
-    mutations.setIsInGame(true);
+    GameModule.setIsInGame(true);
     this.patternGetter = patternGetter;
   }
 
   tick() {
-    mutations.deductHpForAllPlayers();
+    GameModule.deductHpForAllPlayers();
     const player = this.getMyPlayer()!;
     if (player.hp === 0) {
-      mutations.gameOver(player);
+      GameModule.gameOver(player);
     }
   }
 
   getMyPlayer(): IPlayer | null {
-    const players = store.state.players.filter(
-      (t) => t.id == GlobalServices.PeerToPeer.getId()
+    const players = GameModule.players.filter(
+      (t: IPlayer) => t.id == GlobalServices.PeerToPeer.getId()
     );
     return players.length > 0 ? players[0] : null;
   }
@@ -93,7 +94,7 @@ export default class GameClient {
     if (c >= row.length) return;
 
     this.keyEntered.next({ row: rowNumber, col: c });
-    mutations.setBoard({
+    GameModule.setBoard({
       player: player,
       row: rowNumber,
       col: c,
@@ -122,7 +123,7 @@ export default class GameClient {
   }
 
   applyPattern(player: IPlayer, guess: string, pattern: PatternType) {
-    mutations.applyPattern({
+    GameModule.applyPattern({
       player,
       row: this.getRowNumber()!,
       pattern,
@@ -133,25 +134,25 @@ export default class GameClient {
       pattern.filter((t) => t !== "+").length === 0;
 
     if (isCorrectPattern(pattern)) {
-      mutations.addHp(player, store.state.scoreConfig.hpForCorrectWord);
+      GameModule.addHp(player, GameModule.scoreConfig.hpForCorrectWord);
       return this.gotoNextWord(player);
     }
 
     let extraHp = 0;
     for (const ch of pattern) {
-      if (ch === "+") extraHp += store.state.scoreConfig.hpForGreen;
-      if (ch === "?") extraHp += store.state.scoreConfig.hpForYellow;
+      if (ch === "+") extraHp += GameModule.scoreConfig.hpForGreen;
+      if (ch === "?") extraHp += GameModule.scoreConfig.hpForYellow;
     }
-    mutations.addHp(player, extraHp);
+    GameModule.addHp(player, extraHp);
 
     if (this.getRowNumber() == NUM_GUESSES - 1) {
-      mutations.addHp(player, -store.state.scoreConfig.hpForIncorrectWord);
+      GameModule.addHp(player, -GameModule.scoreConfig.hpForIncorrectWord);
       return this.gotoNextWord(player);
     }
   }
 
   private gotoNextWord(player: IPlayer) {
-    mutations.clearBoard(player);
+    GameModule.clearBoard(player);
     this.patternGetter.getNextWord();
   }
 
@@ -171,7 +172,7 @@ export default class GameClient {
     }
     c--;
 
-    mutations.applyBackspace({
+    GameModule.applyBackspace({
       player,
       row: rowNumber,
       col: c,
