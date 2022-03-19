@@ -1,10 +1,17 @@
 import { GlobalServices } from "@/services/GlobalServices";
+import { GameModule } from "@/services/Store/modules/Game";
 import { NotificationsModule } from "@/services/Store/modules/Notifications";
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import HomeAndLobbyView from "../views/HomeAndLobbyView.vue";
 
 Vue.use(VueRouter);
+
+export enum Routes {
+  LOBBY = "/lobby",
+  ABOUT = "/about",
+  GAME = "/game",
+}
 
 const routes: Array<RouteConfig> = [
   {
@@ -16,7 +23,7 @@ const routes: Array<RouteConfig> = [
     ],
   },
   {
-    path: "/about",
+    path: Routes.ABOUT,
     name: "about",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
@@ -26,7 +33,7 @@ const routes: Array<RouteConfig> = [
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
   {
-    path: "/game",
+    path: Routes.GAME,
     name: "game",
     component: () => import("../views/GameView.vue"),
   },
@@ -39,6 +46,13 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  if (from.path.includes("game")) {
+    const player = GlobalServices.GameClient?.getMyPlayer();
+    if (player != null) {
+      GameModule.setPlayerIsInGame({ player, isInGame: false });
+    }
+  }
+
   if (
     to.path.includes("lobby") &&
     !GlobalServices.PeerToPeer.getIsConnected()

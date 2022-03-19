@@ -6,6 +6,7 @@ export interface IPlayer {
   hp: number;
   score: number;
   isGameOver: boolean;
+  isInGame: boolean;
   numGuesses: number;
   boardState: BoardType;
   patternBoard: BoardType;

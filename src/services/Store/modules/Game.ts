@@ -137,6 +137,7 @@ class Game extends VuexModule implements IGameState {
   @Mutation
   reset() {
     Object.assign(this, getInitialState());
+    console.log(this);
   }
 
   @Mutation
@@ -147,10 +148,11 @@ class Game extends VuexModule implements IGameState {
   }
 
   @Mutation
-  addHp(thePlayer: IPlayer, hpToAdd: number) {
-    const player = getPlayerById(this, thePlayer.id);
-    player!.hp += hpToAdd;
-    player!.score += hpToAdd;
+  addHp(data: { player: IPlayer; hpToAdd: number }) {
+    const player = getPlayerById(this, data.player.id);
+    console.log("hp to add", data.hpToAdd);
+    player!.hp += data.hpToAdd;
+    player!.score += data.hpToAdd;
     console.log(player);
   }
 
@@ -164,8 +166,16 @@ class Game extends VuexModule implements IGameState {
   }
 
   @Mutation
-  gameOver(player: IPlayer) {
+  gameOver(thePlayer: IPlayer) {
+    const player = getPlayerById(this, thePlayer.id)!;
     player.isGameOver = true;
+    publishPlayer(player);
+  }
+
+  @Mutation
+  setPlayerIsInGame(data: { player: IPlayer; isInGame: boolean }) {
+    const player = getPlayerById(this, data.player.id)!;
+    player.isInGame = data.isInGame;
     publishPlayer(player);
   }
 }

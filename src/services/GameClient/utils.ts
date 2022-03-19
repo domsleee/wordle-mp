@@ -1,6 +1,5 @@
 import { IPlayer } from "../Store/IPlayer";
 import { GameModule, IGameState } from "../Store/modules/Game";
-import { store } from "../Store/Store";
 import { IScoreConfig } from "./IScoreConfig";
 
 export type BoardType = Array<Array<string>>;
@@ -24,7 +23,7 @@ export function getBoardArray(b: BoardType) {
 }
 
 export function getPlayerById(state: IGameState, id: string) {
-  const players = GameModule.players.filter((t: IPlayer) => t.id === id);
+  const players = state.players.filter((t: IPlayer) => t.id === id);
   return players.length === 1 ? players[0] : null;
 }
 
@@ -35,6 +34,7 @@ export function createEmptyPlayer(id: string, name = "Guest"): IPlayer {
     score: 0,
     id,
     isGameOver: false,
+    isInGame: false,
     boardState: getEmptyBoardState(5, 6),
     patternBoard: getEmptyBoardState(5, 6),
     hp: GameModule.scoreConfig.startingHp,

@@ -16,6 +16,9 @@
 </template>
 
 <script lang="ts">
+import router, { Routes } from "@/router";
+import { GlobalServices } from "@/services/GlobalServices";
+import { IPlayer } from "@/services/Store/IPlayer";
 import { GameModule } from "@/services/Store/modules/Game";
 import Vue from "vue";
 export default Vue.extend({
@@ -24,7 +27,7 @@ export default Vue.extend({
   },
   methods: {
     backToLobby() {
-      console.log("back to lobby");
+      router.push(Routes.LOBBY);
     },
   },
   computed: {

@@ -51,6 +51,11 @@ export default class GameClient {
 
   startGame(patternGetter: PatternGetter) {
     GameModule.setIsInGame(true);
+    const player = GlobalServices.GameClient!.getMyPlayer()!;
+    GameModule.setPlayerIsInGame({
+      player,
+      isInGame: true,
+    });
     this.patternGetter = patternGetter;
   }
 
@@ -134,7 +139,15 @@ export default class GameClient {
       pattern.filter((t) => t !== "+").length === 0;
 
     if (isCorrectPattern(pattern)) {
-      GameModule.addHp(player, GameModule.scoreConfig.hpForCorrectWord);
+      console.log(
+        "hp for correct word: ",
+        GameModule.scoreConfig.hpForCorrectWord
+      );
+      debugger;
+      GameModule.addHp({
+        player,
+        hpToAdd: GameModule.scoreConfig.hpForCorrectWord,
+      });
       return this.gotoNextWord(player);
     }
 
@@ -143,10 +156,13 @@ export default class GameClient {
       if (ch === "+") extraHp += GameModule.scoreConfig.hpForGreen;
       if (ch === "?") extraHp += GameModule.scoreConfig.hpForYellow;
     }
-    GameModule.addHp(player, extraHp);
+    GameModule.addHp({ player, hpToAdd: extraHp });
 
-    if (this.getRowNumber() == NUM_GUESSES - 1) {
-      GameModule.addHp(player, -GameModule.scoreConfig.hpForIncorrectWord);
+    if (this.getRowNumber() == NUM_GUESSES) {
+      GameModule.addHp({
+        player,
+        hpToAdd: -GameModule.scoreConfig.hpForIncorrectWord,
+      });
       return this.gotoNextWord(player);
     }
   }
