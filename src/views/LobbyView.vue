@@ -16,6 +16,9 @@
       </transition-group>
     </div>
     <v-container style="max-width: 450px">
+      <v-row style="display: block" class="text-center"
+        >Lobby Code: {{ lobbyCode }}</v-row
+      >
       <v-row class="my-5 mx-2" justify="end">
         <v-text-field
           outlined
@@ -93,7 +96,7 @@ import Vue from "vue";
 import PlayerInfoComponent from "@/components/PlayerInfoComponent.vue";
 import { createEmptyPlayer, getPlayerById } from "@/services/GameClient/utils";
 import { GlobalServices } from "@/services/GlobalServices";
-import router from "@/router";
+import router, { Routes } from "@/router";
 import { GameModule } from "@/services/Store/modules/Game";
 export default Vue.extend({
   components: {
@@ -105,7 +108,7 @@ export default Vue.extend({
   }),
   computed: {
     players: () => {
-      return GameModule.players;
+      return GameModule.players.filter((t) => t.currentRoute === Routes.LOBBY);
     },
     hostId: () => {
       return GlobalServices.PeerToPeer.getHostId();
@@ -113,6 +116,7 @@ export default Vue.extend({
     myId: () => {
       return GlobalServices.PeerToPeer.getId();
     },
+    lobbyCode: () => GlobalServices.PeerToPeer.getHostId(),
   },
   methods: {
     addItem() {
@@ -125,7 +129,10 @@ export default Vue.extend({
       });
     },
     startGame() {
-      GlobalServices.PeerToPeer.broadcastAndToSelf({ command: "START_GAME" });
+      GlobalServices.PeerToPeer.broadcastAndToSelf({
+        command: "START_GAME",
+        gameId: GameModule.getAndIncrementGameId(),
+      });
     },
   },
 });

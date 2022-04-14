@@ -9,9 +9,5 @@ interface IUpdatePlayer {
 
 interface IStartGame {
   command: "START_GAME";
+  gameId: number;
 }
-
-export type IResponseData = {
-  name: "something";
-  command: "something";
-};

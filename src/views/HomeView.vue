@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import router from "@/router/index";
+import router, { Routes } from "@/router/index";
 import { GlobalServices } from "@/services/GlobalServices";
 import { createEmptyPlayer } from "@/services/GameClient/utils";
 import { getLogger } from "loglevel";
@@ -140,7 +140,7 @@ export default Vue.extend({
       GameModule.addPlayer(
         createEmptyPlayer(GlobalServices.PeerToPeer.getId())
       );
-      router.push("/lobby/" + GlobalServices.PeerToPeer.getId());
+      GlobalServices.GameClient!.gotoRouteAndUpdatePlayerRoute(Routes.LOBBY);
     },
   },
 });

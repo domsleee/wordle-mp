@@ -6,7 +6,7 @@ import { resettable } from "./resettable";
 
 const logger = getLogger("peer-to-peer.service");
 const TIMEOUT_MS = 5000;
-const HEROKU_HOST = "heroku-chess-123.herokuapp.com";
+const HEROKU_HOST = "peerjs-0-6-1.herokuapp.com";
 export const DEFAULT_ID = "default";
 
 export class PeerToPeerService {

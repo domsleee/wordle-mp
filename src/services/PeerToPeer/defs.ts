@@ -1,6 +1,6 @@
-import { IRequestData, IResponseData } from "./messages";
+import { IRequestData } from "./messages";
 
-export type MessageData = IDisconnect | IRequestData | IResponseData;
+export type MessageData = IDisconnect | IRequestData;
 
 export type IMessage = IGenericMessage<MessageData>;
 

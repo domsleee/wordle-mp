@@ -19,18 +19,8 @@ const routes: Array<RouteConfig> = [
     component: HomeAndLobbyView,
     children: [
       { path: "", component: () => import("../views/HomeView.vue") },
-      { path: "lobby/:id", component: () => import("../views/LobbyView.vue") },
+      { path: "lobby", component: () => import("../views/LobbyView.vue") },
     ],
-  },
-  {
-    path: Routes.ABOUT,
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
   {
     path: Routes.GAME,
@@ -46,6 +36,16 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  if (GlobalServices.PeerToPeer.getIsConnected()) {
+    const player = GlobalServices.GameClient?.getMyPlayer();
+    if (player) {
+      const r = to.path.split("/")[0] + "/";
+      if (r in Object.values(Routes)) {
+        GameModule.setPlayerRoute({ player, route: r as Routes });
+      }
+    }
+  }
+
   if (from.path.includes("game")) {
     const player = GlobalServices.GameClient?.getMyPlayer();
     if (player != null) {

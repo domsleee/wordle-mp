@@ -1,3 +1,4 @@
+import { Routes } from "@/router";
 import { IScoreConfig } from "@/services/GameClient/IScoreConfig";
 import { A_CHAR_CODE } from "@/services/GameClient/PatternGetter";
 import {
@@ -29,6 +30,7 @@ export interface IGameState {
   players: Array<IPlayer>;
   seed: string;
   scoreConfig: IScoreConfig;
+  gameId: number;
 }
 
 @Module({
@@ -42,6 +44,7 @@ class Game extends VuexModule implements IGameState {
   public players!: Array<IPlayer>;
   public seed!: string;
   public scoreConfig!: IScoreConfig;
+  public gameId = 0;
 
   constructor(module: any) {
     super(module);
@@ -125,7 +128,7 @@ class Game extends VuexModule implements IGameState {
     const id = partialPlayer.id!;
     const player = getPlayerById(this, id);
     if (player == null) {
-      this.addPlayer({ ...createEmptyPlayer(id), ...partialPlayer });
+      GameModule.addPlayer({ ...createEmptyPlayer(id), ...partialPlayer });
       return;
     }
     if (partialPlayer.name) player.name = partialPlayer.name;
@@ -149,11 +152,10 @@ class Game extends VuexModule implements IGameState {
 
   @Mutation
   addHp(data: { player: IPlayer; hpToAdd: number }) {
-    const player = getPlayerById(this, data.player.id);
-    console.log("hp to add", data.hpToAdd);
-    player!.hp += data.hpToAdd;
-    player!.score += data.hpToAdd;
-    console.log(player);
+    const player = getPlayerById(this, data.player.id)!;
+    player.hp += data.hpToAdd;
+    player.score += data.hpToAdd;
+    publishPlayer(player);
   }
 
   @Mutation
@@ -163,6 +165,7 @@ class Game extends VuexModule implements IGameState {
     player.patternBoard = p.patternBoard;
     player.numGuesses = p.numGuesses;
     player.letterToPattern = p.letterToPattern;
+    publishPlayer(player);
   }
 
   @Mutation
@@ -178,6 +181,33 @@ class Game extends VuexModule implements IGameState {
     player.isInGame = data.isInGame;
     publishPlayer(player);
   }
+
+  @Mutation
+  setPlayerRoute(data: { player: IPlayer; route: Routes }) {
+    const player = getPlayerById(this, data.player.id)!;
+    player.currentRoute = data.route;
+    publishPlayer(player);
+  }
+
+  @Mutation
+  setCurrentPlayer(data: { player: Partial<IPlayer> }) {
+    const myPlayer = GlobalServices.GameClient?.getMyPlayer();
+    if (myPlayer) {
+      const player = getPlayerById(this, myPlayer.id)!;
+      Object.assign(player, data.player);
+      publishPlayer(player);
+    }
+  }
+
+  @Mutation
+  getAndIncrementGameId() {
+    return this.gameId++;
+  }
+
+  @Mutation
+  removePlayer(playerId: string) {
+    this.players = this.players.filter((t) => t.id !== playerId);
+  }
 }
 
 function getInitialState(): IGameState {
@@ -187,6 +217,7 @@ function getInitialState(): IGameState {
     players: [],
     seed: "1234",
     scoreConfig: getDefaultScoreConfig(),
+    gameId: 0,
   };
 }
 

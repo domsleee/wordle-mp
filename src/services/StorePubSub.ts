@@ -6,7 +6,7 @@ import { store } from "./Store/Store";
 
 export class StorePubSub {
   subs?: Subscription;
-  startGame = new Subject<void>();
+  startGame = new Subject<number>();
 
   attach() {
     this.subs = GlobalServices.PeerToPeer.getMessageObservable().subscribe(
@@ -14,7 +14,9 @@ export class StorePubSub {
         if (msg.data.command === "UPDATE_PLAYER") {
           GameModule.processPlayer(msg.data.data);
         } else if (msg.data.command === "START_GAME") {
-          this.startGame.next();
+          this.startGame.next(msg.data.gameId);
+        } else if (msg.data.command === "DISCONNECTED") {
+          GameModule.removePlayer(msg.data.name);
         }
       }
     );

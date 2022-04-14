@@ -8,7 +8,7 @@ import { PatternGetter } from "./PatternGetter";
 import { Subject, Subscription } from "rxjs";
 import { dictionary } from "./Dictionary";
 import { StorePubSub } from "../StorePubSub";
-import router from "@/router";
+import router, { Routes } from "@/router";
 import { GameModule } from "../Store/modules/Game";
 
 const logger = getLogger("game-client");
@@ -27,8 +27,14 @@ export default class GameClient {
       GlobalServices.KeyboardEvents.keydownFirstTime.subscribe((t) =>
         this.onKeyPress(t)
       ),
-      GlobalServices.StorePubSub.startGame.subscribe(() => {
-        router.push("/game");
+      GlobalServices.StorePubSub.startGame.subscribe((gameId) => {
+        if (
+          GlobalServices.GameClient?.getMyPlayer()?.currentRoute ===
+          Routes.LOBBY
+        ) {
+          this.gotoRouteAndUpdatePlayerRoute(Routes.GAME);
+          GameModule.setCurrentPlayer({ player: { gameId } });
+        }
       }),
     ];
   }
@@ -80,6 +86,10 @@ export default class GameClient {
     if (player.numGuesses >= player.boardState.length) return null;
 
     return player.numGuesses;
+  }
+
+  gotoRouteAndUpdatePlayerRoute(route: Routes) {
+    router.push(route);
   }
 
   private tryApplyKey(char: string) {
@@ -158,7 +168,7 @@ export default class GameClient {
     }
     GameModule.addHp({ player, hpToAdd: extraHp });
 
-    if (this.getRowNumber() == NUM_GUESSES) {
+    if (player.numGuesses == NUM_GUESSES) {
       GameModule.addHp({
         player,
         hpToAdd: -GameModule.scoreConfig.hpForIncorrectWord,

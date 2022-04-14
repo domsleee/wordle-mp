@@ -1,3 +1,4 @@
+import { Routes } from "@/router";
 import { IPlayer } from "../Store/IPlayer";
 import { GameModule, IGameState } from "../Store/modules/Game";
 import { IScoreConfig } from "./IScoreConfig";
@@ -39,6 +40,8 @@ export function createEmptyPlayer(id: string, name = "Guest"): IPlayer {
     patternBoard: getEmptyBoardState(5, 6),
     hp: GameModule.scoreConfig.startingHp,
     letterToPattern: new Array<PatternChar | "">(27).fill(""),
+    currentRoute: Routes.LOBBY,
+    gameId: 0,
   };
 }
 

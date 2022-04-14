@@ -27,7 +27,7 @@ export default Vue.extend({
   },
   methods: {
     backToLobby() {
-      router.push(Routes.LOBBY);
+      GlobalServices.GameClient!.gotoRouteAndUpdatePlayerRoute(Routes.LOBBY);
     },
   },
   computed: {
