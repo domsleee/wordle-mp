@@ -4,6 +4,8 @@ import { BoardType, PatternChar } from "../GameClient/utils";
 export interface IPlayer {
   id: string;
   name: string;
+  currentRoute: Routes;
+
   hp: number;
   score: number;
   isGameOver: boolean;
@@ -12,6 +14,5 @@ export interface IPlayer {
   boardState: BoardType;
   patternBoard: BoardType;
   letterToPattern: Array<PatternChar | "">;
-  currentRoute: Routes;
   gameId: number;
 }

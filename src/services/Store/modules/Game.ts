@@ -8,6 +8,8 @@ import {
   getPlayerById,
 } from "@/services/GameClient/utils";
 import { GlobalServices } from "@/services/GlobalServices";
+import { playerKeysToUpdate } from "@/services/Shared/KeysToUpdate";
+import ModelUpdater from "@/services/Shared/ModelUpdater";
 import Vue from "vue";
 import {
   getModule,
@@ -131,10 +133,9 @@ class Game extends VuexModule implements IGameState {
       GameModule.addPlayer({ ...createEmptyPlayer(id), ...partialPlayer });
       return;
     }
-    if (partialPlayer.name) player.name = partialPlayer.name;
-    if (partialPlayer.hp) player.hp = partialPlayer.hp;
-    if ("numGuesses" in partialPlayer)
-      player.numGuesses = partialPlayer.numGuesses!;
+
+    const m = new ModelUpdater();
+    m.updatePlayer(player, partialPlayer);
   }
 
   @Mutation

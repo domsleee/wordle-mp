@@ -94,10 +94,16 @@ div.tooltip-helper > button {
 <script lang="ts">
 import Vue from "vue";
 import PlayerInfoComponent from "@/components/PlayerInfoComponent.vue";
-import { createEmptyPlayer, getPlayerById } from "@/services/GameClient/utils";
+import {
+  createEmptyPlayer,
+  createResettablePlayer,
+  getEmptyBoardState,
+  getPlayerById,
+} from "@/services/GameClient/utils";
 import { GlobalServices } from "@/services/GlobalServices";
 import router, { Routes } from "@/router";
 import { GameModule } from "@/services/Store/modules/Game";
+import { IPlayer } from "@/services/Store/IPlayer";
 export default Vue.extend({
   components: {
     PlayerInfoComponent,
@@ -117,6 +123,11 @@ export default Vue.extend({
       return GlobalServices.PeerToPeer.getId();
     },
     lobbyCode: () => GlobalServices.PeerToPeer.getHostId(),
+  },
+  mounted: function () {
+    GameModule.setCurrentPlayer({
+      player: createResettablePlayer(),
+    });
   },
   methods: {
     addItem() {

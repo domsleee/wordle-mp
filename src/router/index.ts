@@ -58,10 +58,10 @@ router.beforeEach((to, from, next) => {
     !GlobalServices.PeerToPeer.getIsConnected()
   ) {
     setTimeout(() => {
-      NotificationsModule.raiseNotification({
+      /*NotificationsModule.raiseNotification({
         type: "warning",
         msg: "rejoining lobbies by refreshing is not supported",
-      });
+      });*/
     }, 1000);
 
     next("/");

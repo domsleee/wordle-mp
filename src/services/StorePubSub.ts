@@ -34,13 +34,7 @@ export class StorePubSub {
   }
 
   getPartialPlayer(player: IPlayer): Partial<IPlayer> {
-    return {
-      id: player.id,
-      name: player.name,
-      numGuesses: player.numGuesses,
-      hp: player.hp,
-      isGameOver: player.isGameOver,
-    };
+    return player;
   }
 
   sendUserAllData(id: string) {

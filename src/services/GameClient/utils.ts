@@ -31,17 +31,23 @@ export function getPlayerById(state: IGameState, id: string) {
 export function createEmptyPlayer(id: string, name = "Guest"): IPlayer {
   return {
     name,
+    id,
+    currentRoute: Routes.LOBBY,
+    gameId: 0,
+    ...createResettablePlayer(),
+  };
+}
+
+export function createResettablePlayer() {
+  return {
     numGuesses: 0,
     score: 0,
-    id,
     isGameOver: false,
     isInGame: false,
     boardState: getEmptyBoardState(5, 6),
     patternBoard: getEmptyBoardState(5, 6),
     hp: GameModule.scoreConfig.startingHp,
     letterToPattern: new Array<PatternChar | "">(27).fill(""),
-    currentRoute: Routes.LOBBY,
-    gameId: 0,
   };
 }
 

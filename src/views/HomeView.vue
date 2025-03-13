@@ -137,9 +137,8 @@ export default Vue.extend({
     },
     gotoLobby: function () {
       GlobalServices.registerGameClient();
-      GameModule.addPlayer(
-        createEmptyPlayer(GlobalServices.PeerToPeer.getId())
-      );
+      const guestId = GlobalServices.PeerToPeer.getId();
+      GameModule.addPlayer(createEmptyPlayer(guestId, `Guest`));
       GlobalServices.GameClient!.gotoRouteAndUpdatePlayerRoute(Routes.LOBBY);
     },
   },
